@@ -7,15 +7,17 @@ function clickHandler(e) {
     
 	//clear highlighting
 	//console.log(squares);
+	/*
 	for (i in squares) {
 		squares[i].highlighted = false;
 		if (squares[i].checker != null) {
 		squares[i].checker.highlighted = false;
 		}
-		//console.log(i, squares[i].checker.color);
+		//console.log(squares);
 		}
 	drawBoard(squares, checkers);
-		
+	*/
+	
 	//loop through all the objects in squares[]
     for (var i=0; i<squares.length; i++) {
 		//console.log(mousex, mousey);
@@ -28,29 +30,47 @@ function clickHandler(e) {
 				//console.log(squares[i].checker.color);
 				//console.log(mousex, mousey, squares[i].num);
 				if (squares[i].checker != null) {
+					clearHighlighting();
 					squares[i].checker.highlighted = true;
+					chkActive = i;
+					eligibleSquareCheck(squares, i);
+					/*
+					var sqOrig = i;
+					var sqOffset;
+					if (squares[i].checker.color == "red") {
+						sqOffset = 3;
+						eligibleSquareCheck(sqOrig, sqOffset);
+						sqOffset = 4;
+						eligibleSquareCheck(sqOrig, sqOffset);
+						sqOffset = 5;
+						eligibleSquareCheck(sqOrig, sqOffset);
+					}
+					else if (squares[i].checker.color == "black") {
+						sqOffset = -3;
+						eligibleSquareCheck(sqOrig, sqOffset);
+						sqOffset = -4;
+						eligibleSquareCheck(sqOrig, sqOffset);
+						sqOffset = -5;
+						eligibleSquareCheck(sqOrig, sqOffset);
+					}
+					*/
+					drawBoard(squares, checkers);
 				}
-				if (squares[i].checker.color == "red") {
-					var sqRight = i + 4;
-					var sqLeft = i + 5;
-					//console.log(squares[sq].num, squares[sq].checker.color);
-					if (squares[sqRight].x == (squares[i].x + sqSize) && squares[sqRight].checker == null) {
-						squares[sqRight].highlighted = true;
-						//console.log("re-draw");
-						drawBoard(squares, checkers);
-					}
-					if (squares[sqLeft].x == (squares[i].x - sqSize) && squares[sqLeft].checker == null) {
-						squares[sqLeft].highlighted = true;
-						//console.log("re-draw");
-						drawBoard(squares, checkers);
-						
-					}
-					//for (i in squares) {
-					//console.log(i, squares[i].highlighted);
-					//}
-					//console.log("Square number " + squares[sqRight].num + " is highlighted = " + squares[sqRight].highlighted);
+				else if (squares[i].highlighted == true) {
+					//console.log(squares);
+					//create copy of active checker in new square
+					var x = squares[i].x + (sqSize / 2);
+					var y = squares[i].y + (sqSize / 2);
+					var size = squares[chkActive].checker.size;
+					var color = squares[chkActive].checker.color;
+					squares[i].checker = new checker(x, y, size, color);
+					//remove active checker from old square
+					squares[chkActive].checker = null;
+					//clear all highlighting
+					clearHighlighting();
 				}
 			}
 		}
 	}
 }
+	
