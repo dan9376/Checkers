@@ -1,7 +1,6 @@
-function drawBoard (sqArray,chkArray){
+function drawBoard (sqArray){
 	ctx.clearRect(0,0, can.width, can.length);
 	drawSquares(sqArray);
-	//drawCheckers(chkArray);
 }
 
 function drawSquares(array) {
@@ -19,19 +18,6 @@ function drawSquares(array) {
 			//console.log(array[i].checker);
 			drawChecker(array[i].checker.x, array[i].checker.y, array[i].checker.size, array[i].checker.color, array[i].checker.highlighted);
 		}
-	}
-}
-
-function drawCheckers(array) {
-	for (i in array) {
-		var x = array[i].x;
-		var y = array[i].y;
-		var num = array[i].num;
-		var size = array[i].size;
-		var color = array[i].color;
-		var highlighted = array[i].highlighted;
-    
-		drawChecker(x, y, size, color, highlighted);
 	}
 }
 

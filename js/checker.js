@@ -1,5 +1,5 @@
 // define a checker
-function checker(x, y, size, color) {
+function Checker(x, y, size, color) {
     this.x = x;
     this.y = y;
     this.size = size;

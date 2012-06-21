@@ -5,19 +5,6 @@ function clickHandler(e) {
     mousex = e.clientX;
     mousey = e.clientY;
     
-	//clear highlighting
-	//console.log(squares);
-	/*
-	for (i in squares) {
-		squares[i].highlighted = false;
-		if (squares[i].checker != null) {
-		squares[i].checker.highlighted = false;
-		}
-		//console.log(squares);
-		}
-	drawBoard(squares, checkers);
-	*/
-	
 	//loop through all the objects in squares[]
     for (var i=0; i<squares.length; i++) {
 		//console.log(mousex, mousey);
@@ -27,43 +14,29 @@ function clickHandler(e) {
             if ((mousey > (parseInt(squares[i].y))) && (mousey < (parseInt(squares[i].y)) + sqSize)) {
                 // mousex and mousey are both in the square,
                 // so this must be the square[] object we want
-				//console.log(squares[i].checker.color);
-				//console.log(mousex, mousey, squares[i].num);
+				//
+				// if there is a checker in the square, highlight valid moves
 				if (squares[i].checker != null) {
 					clearHighlighting();
 					squares[i].checker.highlighted = true;
 					chkActive = i;
 					eligibleSquareCheck(squares, i);
-					/*
-					var sqOrig = i;
-					var sqOffset;
-					if (squares[i].checker.color == "red") {
-						sqOffset = 3;
-						eligibleSquareCheck(sqOrig, sqOffset);
-						sqOffset = 4;
-						eligibleSquareCheck(sqOrig, sqOffset);
-						sqOffset = 5;
-						eligibleSquareCheck(sqOrig, sqOffset);
-					}
-					else if (squares[i].checker.color == "black") {
-						sqOffset = -3;
-						eligibleSquareCheck(sqOrig, sqOffset);
-						sqOffset = -4;
-						eligibleSquareCheck(sqOrig, sqOffset);
-						sqOffset = -5;
-						eligibleSquareCheck(sqOrig, sqOffset);
-					}
-					*/
-					drawBoard(squares, checkers);
+					drawBoard(squares);
 				}
+				// if there is not a checker in the square, move the active checker to the selected square if it is a valid move
 				else if (squares[i].highlighted == true) {
-					//console.log(squares);
-					//create copy of active checker in new square
+					// create copy of active checker in new square
 					var x = squares[i].x + (sqSize / 2);
 					var y = squares[i].y + (sqSize / 2);
 					var size = squares[chkActive].checker.size;
 					var color = squares[chkActive].checker.color;
-					squares[i].checker = new checker(x, y, size, color);
+					squares[i].checker = new Checker(x, y, size, color);
+					// remove checker that was jumped over
+					//console.log(middle);
+					if (squares[i].move == "jump") {
+						var kill = squares[i].jumpOver;
+						squares[kill].checker = null;
+					}
 					//remove active checker from old square
 					squares[chkActive].checker = null;
 					//clear all highlighting

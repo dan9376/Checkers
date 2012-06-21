@@ -1,5 +1,5 @@
 // define a square
-function square(x, y, num, size, color) {
+function Square(x, y, num, size, color) {
     this.x = x;
     this.y = y;
     this.num = num;
@@ -7,6 +7,8 @@ function square(x, y, num, size, color) {
     this.color = color;
     this.checker = null;
 	this.highlighted = false;
+	this.move = null;
+	this.jumpOver =  null;
     
     drawSquare(x, y, size, size, color, this.highlighted);
 		
