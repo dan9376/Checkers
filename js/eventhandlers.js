@@ -22,6 +22,7 @@ function clickHandler(e) {
 					chkActive = i;
 					eligibleSquareCheck(squares, i);
 					drawBoard(squares);
+					console.log(squares[i].checker.king);
 				}
 				// if there is not a checker in the square, move the active checker to the selected square if it is a valid move
 				else if (squares[i].highlighted == true) {
@@ -30,7 +31,8 @@ function clickHandler(e) {
 					var y = squares[i].y + (sqSize / 2);
 					var size = squares[chkActive].checker.size;
 					var color = squares[chkActive].checker.color;
-					squares[i].checker = new Checker(x, y, size, color);
+					var king = squares[chkActive].checker.king;
+					squares[i].checker = new Checker(x, y, size, color, king);
 					// remove checker that was jumped over
 					//console.log(middle);
 					if (squares[i].move == "jump") {
@@ -39,6 +41,12 @@ function clickHandler(e) {
 					}
 					//remove active checker from old square
 					squares[chkActive].checker = null;
+					//king the checker if it reaches opponent's back row
+					//console.log(y, squares[i].checker.king);
+					if (squares[i].checker.color == "red" && y == sqSize/2 || squares[i].checker.color == "black" && y == can.height - sqSize/2) {
+						squares[i].checker.king = true;
+						console.log(squares[i].checker.king);
+					}
 					//clear all highlighting
 					clearHighlighting();
 				}

@@ -44,13 +44,13 @@ function initializeCheckers(chkSize) {
 		if (squares[i].num > 20) {
 			chkColor = "black";
 			//console.log(squares[i].num);
-			var chk = new Checker(chkX, chkY, chkSize, chkColor);
+			var chk = new Checker(chkX, chkY, chkSize, chkColor, false);
 			squares[i].checker = chk;
 		}
 		else if (squares[i].num < 13) {
 			chkColor = "red";
 			//console.log(squares[i].num);
-			var chk = new Checker(chkX, chkY, chkSize, chkColor);
+			var chk = new Checker(chkX, chkY, chkSize, chkColor, false);
 			squares[i].checker = chk;
 		}
 		else {
