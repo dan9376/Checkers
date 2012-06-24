@@ -27,7 +27,8 @@
   	<div id="gamespace"></div>
   </div>
 
-  <canvas id="canvas1" width="600" height="600"></canvas>
+  <canvas id="Board" width="400" height="400" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+  <canvas id="Game" width="400" height="400" style="position: absolute; left: 0; top: 0; z-index: 2;"></canvas>
   <footer></footer>
 
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
@@ -38,6 +39,7 @@
   <script type="text/javascript" src="js/initialize.js"></script>
   <script type="text/javascript" src="js/draw.js"></script>
   <script type="text/javascript" src="js/game.js"></script>
+  <script type="text/javascript" src="js/animations.js"></script>
   <script>
     /*
 	if (!currentGame) {

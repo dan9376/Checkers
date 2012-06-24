@@ -1,5 +1,8 @@
-canvas {
+canvas#Board{
     background: rgb(200, 100, 100);
+    border: 0px solid rgb(50,50,50)
+}
+canvas#Game{
     border: 0px solid rgb(50,50,50)
 }
 
