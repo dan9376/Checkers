@@ -38,8 +38,8 @@ function initializeCheckers(chkSize) {
 	this.chkColor;
 	//loop to add checkers to canvas
 	for (var i = 0; i < squares.length; i++) {
-		chkX = squares[i].x + (sqSize / 2);
-		chkY = squares[i].y + (sqSize / 2);
+		chkX = squares[i].point.x + (sqSize / 2);
+		chkY = squares[i].point.y + (sqSize / 2);
 		//console.log(squares.length, squares[i].num);
 		if (squares[i].num > 20) {
 			chkColor = "black";

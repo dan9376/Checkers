@@ -1,10 +1,15 @@
+function render() {
+drawBoard(squares);
+}
+
 function drawBoard (sqArray){
 	clearBoard();
 	drawSquares(sqArray);
 }
 
 function clearBoard (){
-	//ctx.clearRect(0,0, can.width, can.length);
+	//ctxB.clearRect(0,0, canB.width, canB.length);
+	//ctxG.clearRect(0,0, canG.width, canG.length);
 	
 	//ctx.fillStyle = "rgb(200, 100, 100)";
 	//ctx.fillRect(0,0, can.width, can.length);
@@ -14,113 +19,41 @@ function clearBoard (){
 
 function drawSquares(array) {
 	for (i in array) {
-		var x = array[i].x;
-		var y = array[i].y;
-		var num = array[i].num;
-		var size = array[i].size;
-		var color = array[i].color;
-		var checker = array[i].checker;
-		var highlighted = array[i].highlighted;
-		
-		drawSquare(x, y, size, size, color, highlighted);
+		array[i].draw();
 		if (array[i].checker != null) {
-			//console.log(array[i].checker);
-			drawChecker(array[i].checker.x, array[i].checker.y, array[i].checker.size, array[i].checker.color, array[i].checker.highlighted, array[i].checker.king);
+			array[i].checker.draw();
 		}
 	}
-}
-
-function drawSquare(x, y, size, size, color, highlighted) {
-	//ctxB.beginPath();
-	ctxB.fillStyle = color;
-	ctxB.fillRect(x, y, size, size);
-	var line = 1;
-	ctxB.lineWidth = line*2;
-	if (highlighted == true) {
-		//ctx.beginPath();
-		ctxB.strokeStyle = "yellow";
-		ctxB.strokeRect(x+line,y+line,size-(line*2),size-(line*2));
-	}
-}
-
-function drawChecker(x, y, size, color, highlighted, king) {
-	if (king == true) {
-		size = size*1.2;
-	}
-	ctxG.beginPath();
-	ctxG.arc(x, y, size, 0, 2 * Math.PI, false);
-	ctxG.fillStyle = color;
-	ctxG.lineWidth = 2;
-	if (highlighted == true) ctxG.strokeStyle = "yellow";
-	else ctxG.strokeStyle = "black";
-	ctxG.stroke();
-	ctxG.fill();
 	
-	ctxG.beginPath();
-	ctxG.arc(x, y, size*0.75, 0, 2 * Math.PI, false);
-	ctxG.strokeStyle = "rgb(50,50,50)";
-	ctxG.lineWidth = 1;
-	ctxG.stroke();
-	
-	if (king == true) {
-		drawCrown(x, y, size);
-	}
 }
 
 function drawCrown(x, y, width) {
-	var xCenter = x,
-		yCenter = y,
-		width = width,
+	var center = new Point(x,y),
 		height = width*2/4,
-		xStart = xCenter - width/2, 
-		yStart = yCenter - height/2;
+		start = new Point(center.x - width/2, center.y - height/2);
 
 	ctxG.beginPath();
-	ctxG.moveTo(xStart, yStart + height*3/4);
-	ctxG.lineTo(xStart + width, yStart + height*3/4);
+	ctxG.moveTo(start.x, start.y + height*3/4);
+	ctxG.lineTo(start.x + width, start.y + height*3/4);
 	ctxG.bezierCurveTo(
-			xStart + width*15/16, yStart + height*3/4, // control point 1
-			xStart + width*13/16, yStart + height*3/4, // control point 2
-			xStart + width*12/16, yStart// end point
+			start.x + width*15/16, start.y + height*3/4, // control point 1
+			start.x + width*13/16, start.y + height*3/4, // control point 2
+			start.x + width*12/16, start.y// end point
 		);
 	ctxG.bezierCurveTo(
-			xStart + width*11/16, yStart + height*3/4, // control point 1
-			xStart + width*9/16, yStart + height*3/4, // control point 2
-			xStart + width*8/16, yStart + height*3/4// end point
+			start.x + width*11/16, start.y + height*3/4, // control point 1
+			start.x + width*9/16, start.y + height*3/4, // control point 2
+			start.x + width*8/16, start.y + height*3/4// end point
 	);
 	ctxG.bezierCurveTo(
-			xStart + width*7/16, yStart + height*3/4, // control point 1
-			xStart + width*5/16, yStart + height*3/4, // control point 2
-			xStart + width*4/16, yStart// end point
+			start.x + width*7/16, start.y + height*3/4, // control point 1
+			start.x + width*5/16, start.y + height*3/4, // control point 2
+			start.x + width*4/16, start.y// end point
 		);
 	ctxG.bezierCurveTo(
-			xStart + width*3/16, yStart + height*3/4, // control point 1
-			xStart + width*1/16, yStart + height*3/4, // control point 2
-			xStart, yStart + height*3/4// end point
-	);
-	ctxG.fillStyle = "gold";
-	ctxG.lineWidth = 2;
-	ctxG.stroke();
-	ctxG.fill();
-
-	ctxG.beginPath();
-	ctxG.moveTo(xStart, yStart);
-	ctxG.lineTo(xStart, yStart + height);
-	ctxG.bezierCurveTo(
-			xStart + width*4/8, yStart + height*5/4, // control point 1
-			xStart + width*4/8, yStart + height*5/4, // control point 2
-			xStart + width, yStart + height// end point
-		);
-	ctxG.lineTo(xStart + width, yStart);
-	ctxG.bezierCurveTo(
-			xStart + width*7/8, yStart + height*7/8, // control point 1
-			xStart + width*5/8, yStart + height*7/8, // control point 2
-			xStart + width/2, yStart - height*1/4// end point
-		);
-	ctxG.bezierCurveTo(
-			xStart + width*3/8, yStart + height*7/8, // control point 1
-			xStart + width*1/8, yStart + height*7/8, // control point 2
-			xStart, yStart// end point
+			start.x + width*3/16, start.y + height*3/4, // control point 1
+			start.x + width*1/16, start.y + height*3/4, // control point 2
+			start.x, start.y + height*3/4// end point
 	);
 	ctxG.fillStyle = "gold";
 	ctxG.lineWidth = 2;
@@ -128,18 +61,80 @@ function drawCrown(x, y, width) {
 	ctxG.fill();
 
 	ctxG.beginPath();
-	ctxG.moveTo(xCenter, yCenter);
+	ctxG.moveTo(start.x, start.y);
+	ctxG.lineTo(start.x, start.y + height);
 	ctxG.bezierCurveTo(
-			xCenter + height*.15, yCenter - height*.10, // control point 1
-			xCenter + height*.15, yCenter - height*.10, // control point 2
-			xCenter, yCenter - height*.25// end point
+			start.x + width*4/8, start.y + height*5/4, // control point 1
+			start.x + width*4/8, start.y + height*5/4, // control point 2
+			start.x + width, start.y + height// end point
+		);
+	ctxG.lineTo(start.x + width, start.y);
+	ctxG.bezierCurveTo(
+			start.x + width*7/8, start.y + height*7/8, // control point 1
+			start.x + width*5/8, start.y + height*7/8, // control point 2
+			start.x + width/2, start.y - height*1/4// end point
 		);
 	ctxG.bezierCurveTo(
-			xCenter - height*.15, yCenter - height*.10, // control point 1
-			xCenter - height*.15, yCenter - height*.10, // control point 2
-			xCenter, yCenter// end point
+			start.x + width*3/8, start.y + height*7/8, // control point 1
+			start.x + width*1/8, start.y + height*7/8, // control point 2
+			start.x, start.y// end point
+	);
+	ctxG.fillStyle = "gold";
+	ctxG.lineWidth = 2;
+	ctxG.stroke();
+	ctxG.fill();
+
+	ctxG.beginPath();
+	ctxG.moveTo(center.x, center.y);
+	ctxG.bezierCurveTo(
+			center.x + height*.15, center.y - height*.10, // control point 1
+			center.x + height*.15, center.y - height*.10, // control point 2
+			center.x, center.y - height*.25// end point
+		);
+	ctxG.bezierCurveTo(
+			center.x - height*.15, center.y - height*.10, // control point 1
+			center.x - height*.15, center.y - height*.10, // control point 2
+			center.x, center.y// end point
 	);
 	ctxG.fillStyle = "blue";
 	ctxG.stroke();
 	ctxG.fill();
 }
+
+/*
+	ctxB.beginPath();
+    ctxB.moveTo(275, 225);
+    ctxB.bezierCurveTo(
+        325, 75, // control point 1
+        325, 100, // control point 2
+        375, 125// end point
+    );
+    ctxB.stroke();
+	
+	ctxB.beginPath();
+    ctxB.moveTo(275, 225);
+    ctxB.bezierCurveTo(
+        225, 75, // control point 1
+        225, 100, // control point 2
+        175, 125// end point
+    );
+    ctxB.stroke();
+	
+    ctxB.beginPath();
+    ctxB.moveTo(275, 225);
+    ctxB.bezierCurveTo(
+        375, 225, // control point 1
+        375, 275, // control point 2
+        375, 325// end point
+    );
+    ctxB.stroke();
+		
+    ctxB.beginPath();
+    ctxB.moveTo(275, 225);
+    ctxB.bezierCurveTo(
+        175, 225, // control point 1
+        175, 275, // control point 2
+        175, 325// end point
+    );
+    ctxB.stroke();
+	*/

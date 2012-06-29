@@ -9,9 +9,9 @@ function clickHandler(e) {
     for (var i=0; i<squares.length; i++) {
 		//console.log(mousex, mousey);
         // check to see if the mousex value is "in the square"
-        if ((mousex > (parseInt(squares[i].x))) && (mousex < (parseInt(squares[i].x)) + sqSize)) {
+        if ((mousex > (parseInt(squares[i].point.x))) && (mousex < (parseInt(squares[i].point.x)) + sqSize)) {
             // check to see if the mousey value is "in the square"
-            if ((mousey > (parseInt(squares[i].y))) && (mousey < (parseInt(squares[i].y)) + sqSize)) {
+            if ((mousey > (parseInt(squares[i].point.y))) && (mousey < (parseInt(squares[i].point.y)) + sqSize)) {
                 // mousex and mousey are both in the square,
                 // so this must be the square[] object we want
 				//
@@ -19,45 +19,24 @@ function clickHandler(e) {
 				if (squares[i].checker != null) {
 					clearHighlighting();
 					squares[i].checker.highlighted = true;
-					chkActive = i;
-					eligibleSquareCheck(squares, i);
+					//console.log(chkActive);
+					//if (chkActive == null) {
+						chkActive = i;
+					//}
+					squares[i].validMoves();
+					//eligibleSquareCheck(squares, i);
 					//console.log(squares[i], squares[i].x, squares[i].y);
 					drawBoard(squares);
 				}
 				// if there is not a checker in the square, move the active checker to the selected square if it is a valid move
 				else if (squares[i].highlighted == true) {
-					// move active checker from square into variable for use in animation
+					// copy active checker from square into variable for use in animation
 					chkMoving = squares[chkActive].checker;
-					//squares[chkActive].checker = null;
 					// animated move
-					//console.log(chkMoving, i, chkActive);
-					animMoveChecker(chkMoving, i, chkActive);
-					/*
-					// create copy of active checker in new square
-					var x = squares[i].x + (sqSize / 2);
-					var y = squares[i].y + (sqSize / 2);
-					var size = squares[chkActive].checker.size;
-					var color = squares[chkActive].checker.color;
-					var king = squares[chkActive].checker.king;
-					squares[i].checker = new Checker(x, y, size, color, king);
-					// remove checker that was jumped over
-					//console.log(middle);
-					if (squares[i].move == "jump") {
-						var kill = squares[i].jumpOver;
-						squares[kill].checker = null;
-					}
-					//remove active checker from old square
-					squares[chkActive].checker = null;
+					time = 0;
+					//console.log(chkActive, chkMoving, chkMoving.point);
+					animMoveChecker2(chkMoving, chkMoving.point, i);
 					
-					//king the checker if it reaches opponent's back row
-					//console.log(y, squares[i].checker.king);
-					if (squares[i].checker.color == "red" && y == sqSize/2 || squares[i].checker.color == "black" && y == canG.height - sqSize/2) {
-						squares[i].checker.king = true;
-						console.log(squares[i].checker.king);
-					}
-					//clear all highlighting
-					clearHighlighting();
-					*/
 				}
 			}
 		}

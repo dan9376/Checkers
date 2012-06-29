@@ -10,57 +10,181 @@ window.requestAnimFrame = (function(){
 			};
 })();
 
-function animMoveChecker(checker, sqEnd, sqStart){
-	var currentX = checker.x,
-        currentY = checker.y,
-        targetX = squares[sqEnd].x + sqSize/2
-        targetY = squares[sqEnd].y + sqSize/2,
-        diffX = targetX - currentX,
-        diffY = targetY - currentY,
-        stepX = 2,
-        stepY = 2;
-        
-	var absX = Math.abs((squares[sqStart].x + sqSize/2)-(targetX)),
-		absY = Math.abs((squares[sqStart].y + sqSize/2)-(targetY));
-		
-	if (Math.abs(diffX) < (absX*0.1) || Math.abs(diffX) > (absX*0.9)) { stepX = 1 };
-	if (Math.abs(diffY) < (absY*0.1) || Math.abs(diffY) > (absY*0.9)) { stepY = 1 };
-		
-	if (diffX < 0) { stepX = stepX*(-1) };
-	if (diffY < 0) { stepY = stepY*(-1) };
+function Path(points) {
+    this.points = points;
 
-	if (currentX != targetX) { checker.x += stepX };
-    if (currentY != targetY) { checker.y += stepY };
-	
-	drawBoard(squares);
-	// request new frame
-	if (currentX != targetX || currentY != targetY) {
+    // Sanity check.
+    if (points[0].time == undefined || points[points.length - 1].time == undefined)
+        throw new Error("all control points must be between two real points");
+}
+
+Path.prototype.getXYAtTime = function (t) {
+    var points = this.points;
+
+    // First, see if t is out of range.
+    if (t < points[0].time)
+        return points[0];
+    if (t > points[points.length - 1].time)
+        return points[points.length - 1];
+
+    // OK, t is in range. Find out which Bezier curve we're in.
+    //
+    // Specifically we want 'start' and 'stop' to be the indexes of two points
+    // that each have a .time property, bracketing the current time t; and
+    // all the points in between 'start' and 'stop' should be control points.
+    //
+    var start = 0, stop = points.length - 1;
+    for (var i = 1; i < points.length; i++) {
+        var p = points[i];
+        if (t < p.time) {
+            stop = i;
+            break;
+        }
+        if (p.time != undefined)
+            start = i;
+    }
+    var n = stop - start;
+
+    // Adjust t to be in the range [0, 1).
+    var t0 = points[start].time, t1 = points[stop].time;
+    t = (t - t0) / (t1 - t0);
+    var tInv = 1 - t;
+
+    // Now calculate the current position in the curve.
+    // Wikipedia says this is:
+    //   sum for i = 0 to n of (n C i * (1 - t) ^ (n - i) * t ^ i * P[i])
+    // 
+    var x = 0, y = 0;
+    for (var i = 0; i <= n; i++) {
+        var p = points[start + i];
+        var c = nCr(n, i) * Math.pow(1 - t, n - i) * Math.pow(t, i);
+        x += c * p.x;
+        y += c * p.y;
+    }
+    return {x: x, y: y};
+}
+
+// The number of k-combinations of a set of size n.
+function nCr(n, k) {
+    var z = 1;
+    for (var i = 1; i <= k; i++)
+        z *= (n + 1 - i) / i;
+    return z;
+}
+
+
+function tween(obj, path, callback){ //obj is a game object, path is an array containing multiple points, callback is a function to call after tweening is complete
+	this.end = path.points[path.points.length-1];
+    time = time + 1; // increment timer
+	var p = path.getXYAtTime(time); // p is a point at a given time
+	obj.point.x = p.x;
+	obj.point.y = p.y;
+	render();
+		
+	if (obj.point.x != end.x || obj.point.y != end.y) {
+		// request new frame
 		requestAnimFrame(function(){
-		animMoveChecker(checker, sqEnd, sqStart);
+		tween(obj, path, callback);
 	  });
 	} 
-	else { // animation complete, reassign properties
-		//console.log(squares[sqEnd].checker, checker);
-		// assign checker to new square
-		squares[sqEnd].checker = checker;
-		// king the checker if it reaches opponent's back row
-		if (squares[sqEnd].checker.color == "red" && squares[sqEnd].checker.y == sqSize/2 || squares[sqEnd].checker.color == "black" && squares[sqEnd].checker.y == canG.height - sqSize/2) {
-			squares[sqEnd].checker.king = true;
-			//console.log(squares[sqEnd].checker.king);
-		}
-		// remove active checker from old square
-		squares[chkActive].checker = null;
-		// remove checker that was jumped over
-		if (squares[sqEnd].move == "jump") {
-			var kill = squares[sqEnd].jumpOver;
-			squares[kill].checker = null;
-		}
-		// clear all highlighting
-		clearHighlighting();
-		drawBoard(squares);
-		// clear temp checker
-		chkMoving = null;	
+	else {
+	// animation complete, reassign properties
+		callback();
 	}
-};
+}
 // place the rAF *before* the render() to assure as close to 
 // 60fps with the setTimeout fallback.
+
+function animMoveChecker2(checker, start, sqEnd){ //checker is a Checker object. start is that checker's starting Point, sqEnd is the Square the checker is moving to
+	this.end = new Point();
+	end.x = squares[sqEnd].point.x + sqSize/2;
+    end.y = squares[sqEnd].point.y + sqSize/2;
+    
+	this.control1 = new Point();
+	this.control2 = new Point();
+	
+	time = time + 1;
+	
+	//this.points = [];
+	
+	//console.log(end.x, end.y, checker.x, checker.y, time);
+	if (squares[sqEnd].move == "jump") {
+		// animate move along a bezier curve so it looks like a jump (hopefully)
+		
+		//set control point coordinates
+		if (start.x > end.x) {
+			if (start.y > end.y) { //up,left
+				control1.x = start.x - sqSize/2;
+				control1.y = start.y - sqSize*1.5;
+				control2.x = start.x - sqSize*1.2;
+				control2.y = start.y - sqSize*2.3;			
+			}
+			else { //start.y < end.y = down, left
+				control1.x = start.x - sqSize*1.3;
+				control1.y = start.y + sqSize*.1;
+				control2.x = start.x - sqSize*2.2;
+				control2.y = start.y + sqSize*.9;			
+			}
+		}
+		else { //start.x < end.x
+			if(start.y > end.y) { //up, right
+				control1.x = start.x + sqSize/2;
+				control1.y = start.y - sqSize*1.5;
+				control2.x = start.x + sqSize*1.2;
+				control2.y = start.y - sqSize*2.3;
+			}
+			else { //start.y < end.y = down,right
+				control1.x = start.x + sqSize*1.3;
+				control1.y = start.y + sqSize*.1;
+				control2.x = start.x + sqSize*2.2;
+				control2.y = start.y + sqSize*.9;			
+			}
+		}
+		//here's the Path for the checker to follow
+		this.path = new Path([
+		{x: start.x, y: start.y, time: 0},  // start point
+		{x: control1.x, y: control1.y},     // 2 control points
+		{x: control2.x, y: control2.y},
+		{x: end.x, y: end.y, time: 50}  	// end point
+	  ]);
+	}	
+	else {
+		//straight line move doesn't need control points
+		//here's the Path for the checker to follow
+		this.path = new Path([
+		{x: start.x, y: start.y, time: 0},  // start point
+		{x: end.x, y: end.y, time: 50}  	// end point
+	  ]);	
+	}
+	tween(checker, path, function(){
+	// animation complete, reassign properties
+	
+	// assign checker to new square
+	squares[sqEnd].checker = checker;
+	squares[sqEnd].checker.point = checker.point;
+	//console.log(checker.point, squares[sqEnd].checker.point);
+	// king the checker if it reaches opponent's back row
+	if (squares[sqEnd].checker.color == "red" && squares[sqEnd].checker.point.y == sqSize/2 || squares[sqEnd].checker.color == "black" && squares[sqEnd].checker.point.y == canG.height - sqSize/2) {
+		if (squares[sqEnd].checker.king == false) {
+		squares[sqEnd].checker.king = true;
+		squares[sqEnd].checker.size = squares[sqEnd].checker.size*1.2;
+		}
+	}
+	// remove active checker from old square
+	squares[chkActive].checker = null;
+	// remove checker that was jumped over
+	// TO DO: animate this
+	if (squares[sqEnd].move == "jump") {
+		var kill = squares[sqEnd].jumpOver;
+		squares[kill].checker = null;
+	}
+	// clear all highlighting
+	clearHighlighting();
+	//redraw board
+	drawBoard(squares);
+	// clear temp checker
+	chkMoving = null;	
+	chkActive = null;
+	});
+};
+
