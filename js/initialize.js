@@ -36,6 +36,7 @@ function initializeCheckers(chkSize) {
 	this.chkY;
 	this.chkSize = chkSize;
 	this.chkColor;
+	this.opacity = 1;
 	//loop to add checkers to canvas
 	for (var i = 0; i < squares.length; i++) {
 		chkX = squares[i].point.x + (sqSize / 2);
@@ -44,13 +45,13 @@ function initializeCheckers(chkSize) {
 		if (squares[i].num > 20) {
 			chkColor = "black";
 			//console.log(squares[i].num);
-			var chk = new Checker(chkX, chkY, chkSize, chkColor, false);
+			var chk = new Checker(chkX, chkY, chkSize, chkColor, this.opacity, false);
 			squares[i].checker = chk;
 		}
 		else if (squares[i].num < 13) {
 			chkColor = "red";
 			//console.log(squares[i].num);
-			var chk = new Checker(chkX, chkY, chkSize, chkColor, false);
+			var chk = new Checker(chkX, chkY, chkSize, chkColor,this.opacity, false);
 			squares[i].checker = chk;
 		}
 		else {

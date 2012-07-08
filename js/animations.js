@@ -72,30 +72,49 @@ function nCr(n, k) {
     return z;
 }
 
-
-function tween(obj, path, callback){ //obj is a game object, path is an array containing multiple points, callback is a function to call after tweening is complete
-	this.end = path.points[path.points.length-1];
-    time = time + 1; // increment timer
+function move(obj, path, cleanup){ //obj is a game object, path is an array containing multiple points, cleanup is a callback function to call after moving is complete
+	this.end = path.points[path.points.length-1]; // end is the last point in the path
+    time = time + 1; // increment the timer
 	var p = path.getXYAtTime(time); // p is a point at a given time
-	obj.point.x = p.x;
+	obj.point.x = p.x; // move the reference point of the object to point p
 	obj.point.y = p.y;
-	render();
+
 		
 	if (obj.point.x != end.x || obj.point.y != end.y) {
 		// request new frame
 		requestAnimFrame(function(){
-		tween(obj, path, callback);
-	  });
+		render();
+		move(obj, path, cleanup);
+		});
 	} 
 	else {
 	// animation complete, reassign properties
-		callback();
+		cleanup();
 	}
 }
 // place the rAF *before* the render() to assure as close to 
 // 60fps with the setTimeout fallback.
 
-function animMoveChecker2(checker, start, sqEnd){ //checker is a Checker object. start is that checker's starting Point, sqEnd is the Square the checker is moving to
+function fade(obj, cleanup){ //obj is a game object, cleanup is a callback function to call after fading is complete
+	//time = time + 1; // increment the timer
+	//console.log(obj);
+	obj.opacity = obj.opacity - 0.05;
+		
+	if (obj.opacity > 0) {
+		// request new frame
+		requestAnimFrame(function(){
+		render();
+		fade(obj, cleanup);
+		});
+	} 
+	else {
+	// animation complete, reassign properties
+		cleanup();
+	}
+}
+
+
+function animMoveChecker(checker, start, sqEnd){ //checker is a Checker object. start is that checker's starting Point, sqEnd is the Square the checker is moving to
 	this.end = new Point();
 	end.x = squares[sqEnd].point.x + sqSize/2;
     end.y = squares[sqEnd].point.y + sqSize/2;
@@ -152,39 +171,75 @@ function animMoveChecker2(checker, start, sqEnd){ //checker is a Checker object.
 		//straight line move doesn't need control points
 		//here's the Path for the checker to follow
 		this.path = new Path([
-		{x: start.x, y: start.y, time: 0},  // start point
-		{x: end.x, y: end.y, time: 50}  	// end point
-	  ]);	
+			{x: start.x, y: start.y, time: 0},  // start point
+			{x: end.x, y: end.y, time: 50}  	// end point
+		]);	
 	}
-	tween(checker, path, function(){
+	move(checker, path, function(){
 	// animation complete, reassign properties
-	
-	// assign checker to new square
-	squares[sqEnd].checker = checker;
-	squares[sqEnd].checker.point = checker.point;
 	//console.log(checker.point, squares[sqEnd].checker.point);
 	// king the checker if it reaches opponent's back row
-	if (squares[sqEnd].checker.color == "red" && squares[sqEnd].checker.point.y == sqSize/2 || squares[sqEnd].checker.color == "black" && squares[sqEnd].checker.point.y == canG.height - sqSize/2) {
-		if (squares[sqEnd].checker.king == false) {
-		squares[sqEnd].checker.king = true;
-		squares[sqEnd].checker.size = squares[sqEnd].checker.size*1.2;
+		if (checker.color == "red" && checker.point.y == sqSize/2 || checker.color == "black" && checker.point.y == canG.height - sqSize/2) {
+			if (checker.king == false) {
+				checker.king = true;
+				checker.size = checker.size*1.2;
+			}
 		}
-	}
-	// remove active checker from old square
-	squares[chkActive].checker = null;
-	// remove checker that was jumped over
-	// TO DO: animate this
-	if (squares[sqEnd].move == "jump") {
-		var kill = squares[sqEnd].jumpOver;
-		squares[kill].checker = null;
-	}
-	// clear all highlighting
-	clearHighlighting();
-	//redraw board
-	drawBoard(squares);
-	// clear temp checker
-	chkMoving = null;	
-	chkActive = null;
+		// TO DO: animate this
+		if (squares[sqEnd].move == "jump") {
+			var kill = squares[sqEnd].jumpOver;
+			fade(squares[kill].checker, function(){
+				squares[kill].checker = null;
+				//redraw board
+				render();
+				});
+		}
+		// clear all highlighting
+		clearHighlighting();
+		// assign checker to new square
+		squares[sqEnd].checker = checker;
+		squares[sqEnd].checker.point = checker.point;
+		// remove active checker from old square
+		squares[chkActive].checker = null;
+		// clear temp checker
+		chkMoving = null;	
+		chkActive = null;
+
 	});
 };
-
+// doesn't work yet
+function animBreakChecker(checker) {
+	//console.log(checker);
+	checker.broken(checker);
+	this.a = checker.a;
+	this.b = checker.b;
+	this.c = checker.c;
+	this.d = checker.d;
+	console.log(b, b.point.x);
+	
+	//set path for each piece
+	a.path = new Path([
+		{x: a.point.x, y: a.point.y, time: 0},  		// start point
+		{x: a.point.x+10, y: a.point.y+10, time: 100}   	// end point
+	]);
+	//console.log(a.path);
+	b.path = new Path([
+		{x: b.point.x, y: b.point.y, time: 0},  		// start point
+		{x: b.point.x-10, y: b.point.y+10, time: 100}   	// end point
+	]);
+	c.path = new Path([
+		{x: c.point.x, y: c.point.y, time: 0},  		// start point
+		{x: c.point.x-10, y: c.point.y-10, time: 100}   	// end point
+	]);
+	d.path = new Path([
+		{x: d.point.x, y: d.point.y, time: 0},  		// start point
+		{x: d.point.x-10, y: d.point.y-10, time: 100}   	// end point
+	]);
+	//move pieces
+	move(a, a.path, function(){});
+	move(b, b.path, function(){});
+	move(c, c.path, function(){});
+	move(d, d.path, function(){});
+	render();
+	//console.log(this);
+};
