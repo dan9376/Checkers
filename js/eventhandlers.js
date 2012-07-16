@@ -16,28 +16,50 @@ function clickHandler(e) {
                 // mousex and mousey are both in the square,
                 // so this must be the square object we want
 				//
-				// if there is a checker in the square, highlight valid moves
-				if (squares[i].checker != null) {
-					clearHighlighting();
-					squares[i].checker.highlighted = true;
-					//console.log(chkActive);
-					//if (chkActive == null) {
-						chkActive = i;
-					//}
-					squares[i].validMoves();
-					//console.log(squares[i], squares[i].x, squares[i].y);
-					drawBoard(squares);
+				if (turnState != "done") {
+					//console.log(squares[i]);
+					//console.log(squares[i].checker);
+					// if there is a checker in the square, highlight valid moves
+					if (squares[i].checker != null) {
+						clearHighlighting();
+						squares[i].checker.highlighted = true;
+						sqActive = i;
+						validMoves(squares[i], false);
+						render();
+					}
+					// if there is not a checker in the square, move the active checker to the selected square if it is a valid move
+					//console.log(i, squares[i], squares[i].highlighted);
+					if (squares[i].highlighted == true) {
+						if (squares[sqActive].checker.color == "red" && activePlayer == 2 || squares[sqActive].checker.color == "black" && activePlayer == 1) {
+							alert("You can't move the other player's checkers!")	;
+						}
+						else {
+						// copy active checker from square into variable for use in animation
+						chkMoving = squares[sqActive].checker;
+						// animated move
+						time = 0;
+						animMoveChecker(chkMoving, chkMoving.point, i);
+						}
+					}
 				}
-				// if there is not a checker in the square, move the active checker to the selected square if it is a valid move
-				if (squares[i].highlighted == true) {
-					// copy active checker from square into variable for use in animation
-					chkMoving = squares[chkActive].checker;
-					// animated move
-					time = 0;
-					//console.log(chkActive, chkMoving, chkMoving.point);
-					animMoveChecker(chkMoving, chkMoving.point, i);
-					
-				}
+			}
+		}
+	}
+	if (turnState != "start") {
+		if ((mousex > (parseInt(btnDone.point.x))) && (mousex < (parseInt(btnDone.point.x)) + btnDone.w)) {
+			// check to see if the mousey value is "in the square"
+			if ((mousey > (parseInt(btnDone.point.y))) && (mousey < (parseInt(btnDone.point.y)) + btnDone.h)) {
+				//console.log("Done button pressed.");
+				turnDone();
+			}
+		}
+		
+		if ((mousex > (parseInt(btnUndo.point.x))) && (mousex < (parseInt(btnUndo.point.x)) + btnUndo.w)) {
+			// check to see if the mousey value is "in the square"
+			if ((mousey > (parseInt(btnUndo.point.y))) && (mousey < (parseInt(btnUndo.point.y)) + btnUndo.h)) {
+				console.log("Undo button pressed.");
+				turnUndo();
+				console.log(turnState);
 			}
 		}
 	}

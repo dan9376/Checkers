@@ -1,37 +1,15 @@
 // define a checker
-function Checker(x, y, size, color, opacity, king) {
-	this.point = new Point(x,y);
+function Checker(point, size, color, opacity, king, highlighted) {
+	this.point = new Point(point.x, point.y);
     this.size = size;
     this.color = color;
     this.opacity = opacity;
-	this.highlighted = false;
 	this.king = king || false;
-	
-	this.draw(opacity);
+	this.highlighted = highlighted || false;
 };
 
-Checker.prototype.draw = function() {
-	ctxG.beginPath();
-	ctxG.arc(this.point.x, this.point.y, this.size, 0, 2 * Math.PI, false);
-	//console.log(this.color, this.point.x, this.point.y);
-	if (this.color == "black") {ctxG.fillStyle = "rgba(0,0,0,"+this.opacity+")";}
-	else {ctxG.fillStyle = "rgba(255,0,0,"+this.opacity+")";}
-	ctxG.lineWidth = 2;
-	if (this.highlighted == true) ctxG.strokeStyle = "yellow";
-	else ctxG.strokeStyle = "rgba(0,0,0,"+this.opacity+")";
-	ctxG.stroke();
-	ctxG.fill();
-	
-	ctxG.beginPath();
-	ctxG.arc(this.point.x, this.point.y, this.size*0.75, 0, 2 * Math.PI, false);
-	ctxG.strokeStyle = "rgba(50,50,50,"+this.opacity+")";
-	ctxG.lineWidth = 1;
-	ctxG.stroke();
-	
-	if (this.king == true) {
-		drawCrown(this.point.x, this.point.y, this.size);
-	}
-};
+
+
 // doesn't work yet
 Checker.prototype.quarter = function (checker, arcStart, arcEnd) {
     this.arcStart = arcStart;

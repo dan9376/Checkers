@@ -127,9 +127,8 @@ function animMoveChecker(checker, start, sqEnd){ //checker is a Checker object. 
 	//this.points = [];
 	
 	//console.log(end.x, end.y, checker.x, checker.y, time);
+	// animate move along a bezier curve so it looks like a jump (hopefully)
 	if (squares[sqEnd].move == "jump") {
-		// animate move along a bezier curve so it looks like a jump (hopefully)
-		
 		//set control point coordinates
 		if (start.x > end.x) {
 			if (start.y > end.y) { //up,left
@@ -177,16 +176,16 @@ function animMoveChecker(checker, start, sqEnd){ //checker is a Checker object. 
 	}
 	move(checker, path, function(){
 	// animation complete, reassign properties
-	//console.log(checker.point, squares[sqEnd].checker.point);
-	// king the checker if it reaches opponent's back row
+		// king the checker if it reaches opponent's back row
 		if (checker.color == "red" && checker.point.y == sqSize/2 || checker.color == "black" && checker.point.y == canG.height - sqSize/2) {
 			if (checker.king == false) {
 				checker.king = true;
 				checker.size = checker.size*1.2;
 			}
 		}
-		// TO DO: animate this
+		// handle jump logic
 		if (squares[sqEnd].move == "jump") {
+			// destroy the checker that was jumped over
 			var kill = squares[sqEnd].jumpOver;
 			fade(squares[kill].checker, function(){
 				squares[kill].checker = null;
@@ -197,14 +196,33 @@ function animMoveChecker(checker, start, sqEnd){ //checker is a Checker object. 
 		// clear all highlighting
 		clearHighlighting();
 		// assign checker to new square
-		squares[sqEnd].checker = checker;
-		squares[sqEnd].checker.point = checker.point;
+		squares[sqEnd].checker = copyData(checker);
+		//console.log(squares[sqEnd].checker);
+		//squares[sqEnd].checker.point = checker.point;
 		// remove active checker from old square
-		squares[chkActive].checker = null;
+		squares[sqActive].checker = null;
+		//console.log(squares[sqEnd].checker);
 		// clear temp checker
-		chkMoving = null;	
-		chkActive = null;
-
+		chkMoving = null;
+		if (squares[sqEnd].move == "jump") {
+			sqActive = sqEnd;
+			squares[sqActive].checker.highlighted = true;
+			//console.log(sqActive, validMoves(squares[sqActive],true));
+			if (validMoves(squares[sqActive],true) == 0) {
+				console.log(validMoves(squares[sqActive],true));
+				sqActive = null;
+				clearHighlighting();
+				turnState = "done";
+				//console.log(turnState);
+			}
+			else {turnState = "in progress";}
+		}
+		else {
+			sqActive = null;
+			turnState = "done";
+		}
+	showButtons();
+	//render();
 	});
 };
 // doesn't work yet
