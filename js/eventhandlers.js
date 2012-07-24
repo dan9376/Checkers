@@ -19,13 +19,15 @@ function clickHandler(e) {
 				if (turnState != "done") {
 					//console.log(squares[i]);
 					//console.log(squares[i].checker);
-					// if there is a checker in the square, highlight valid moves
-					if (squares[i].checker != null) {
-						clearHighlighting();
-						squares[i].checker.highlighted = true;
-						sqActive = i;
-						validMoves(squares[i], false);
-						render();
+					if (turnState == "start") {
+						// if there is a checker in the square, highlight valid moves
+						if (squares[i].checker != null) {
+							clearHighlighting();
+							squares[i].checker.highlighted = true;
+							sqActive = i;
+							validMoves(squares[i], false);
+							render();
+						}
 					}
 					// if there is not a checker in the square, move the active checker to the selected square if it is a valid move
 					//console.log(i, squares[i], squares[i].highlighted);
@@ -57,9 +59,9 @@ function clickHandler(e) {
 		if ((mousex > (parseInt(btnUndo.point.x))) && (mousex < (parseInt(btnUndo.point.x)) + btnUndo.w)) {
 			// check to see if the mousey value is "in the square"
 			if ((mousey > (parseInt(btnUndo.point.y))) && (mousey < (parseInt(btnUndo.point.y)) + btnUndo.h)) {
-				console.log("Undo button pressed.");
+				//console.log("Undo button pressed.");
 				turnUndo();
-				console.log(turnState);
+				//console.log(turnState);
 			}
 		}
 	}

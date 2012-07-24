@@ -123,6 +123,7 @@ function animMoveChecker(checker, start, sqEnd){ //checker is a Checker object. 
 	this.control2 = new Point();
 	
 	time = time + 1;
+	moveType = squares[sqEnd].move;
 	
 	//this.points = [];
 	
@@ -177,45 +178,49 @@ function animMoveChecker(checker, start, sqEnd){ //checker is a Checker object. 
 	move(checker, path, function(){
 	// animation complete, reassign properties
 		// king the checker if it reaches opponent's back row
-		if (checker.color == "red" && checker.point.y == sqSize/2 || checker.color == "black" && checker.point.y == canG.height - sqSize/2) {
-			if (checker.king == false) {
+		if (kingEval(checker) == true) {
 				checker.king = true;
 				checker.size = checker.size*1.2;
-			}
 		}
 		// handle jump logic
-		if (squares[sqEnd].move == "jump") {
+		if (moveType == "jump") {
 			// destroy the checker that was jumped over
 			var kill = squares[sqEnd].jumpOver;
+			
+			// fade animation
 			fade(squares[kill].checker, function(){
-				squares[kill].checker = null;
 				//redraw board
 				render();
-				});
+			});
+			
+			// had to move this out of the callback to get the checker data to clear properly
+			squares[kill].checker = null;
 		}
+		moveCurrent = recordMove(moveCurrent, squares[sqActive].num, squares[sqEnd].num, moveType)
+		//console.log(moveCurrent);
 		// clear all highlighting
 		clearHighlighting();
 		// assign checker to new square
-		squares[sqEnd].checker = copyData(checker);
-		//console.log(squares[sqEnd].checker);
-		//squares[sqEnd].checker.point = checker.point;
+		squares[sqEnd].checker = deepCopy(checker);
 		// remove active checker from old square
 		squares[sqActive].checker = null;
-		//console.log(squares[sqEnd].checker);
 		// clear temp checker
 		chkMoving = null;
-		if (squares[sqEnd].move == "jump") {
+		// evaluate if additional jumps are allowed
+		if (moveType == "jump") {
 			sqActive = sqEnd;
 			squares[sqActive].checker.highlighted = true;
-			//console.log(sqActive, validMoves(squares[sqActive],true));
+			//validMoves(squares[sqActive],true);
 			if (validMoves(squares[sqActive],true) == 0) {
-				console.log(validMoves(squares[sqActive],true));
 				sqActive = null;
 				clearHighlighting();
 				turnState = "done";
 				//console.log(turnState);
 			}
-			else {turnState = "in progress";}
+			else {
+				//validMoves(squares[sqActive],true);
+				turnState = "in progress";
+			}
 		}
 		else {
 			sqActive = null;

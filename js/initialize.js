@@ -38,24 +38,25 @@ function initializeCheckers(size) {
 	//this.chkY;
 	//this.chkSize = chkSize;
 	var color;
-	var opacity = 1;
+	var king;
 	//loop to add checkers to canvas
 	for (var i = 0; i < squares.length; i++) {
 		//console.log(squares[i].point);
 		point = new Point(0,0);
 		point.x = squares[i].point.x + (sqSize / 2);
 		point.y = squares[i].point.y + (sqSize / 2);
-		//console.log(squares.length, squares[i].num);
-		if (squares[i].num > 20) {
+		if (boardState[i] == 2 || boardState[i] == 4) {
 			color = "black";
-			//console.log(squares[i].num);
-			var chk = new Checker(point, size, color, opacity, false, false);
+			if (boardState[i] == 4) {king = true;}
+			else {king = false;}
+			var chk = new Checker(point, size, color, 1, king, false);
 			squares[i].checker = chk;
 		}
-		else if (squares[i].num < 13) {
+		else if (boardState[i] == 1 || boardState[i] == 3) {
 			color = "red";
-			//console.log(squares[i].num);
-			var chk = new Checker(point, size, color, opacity, false, false);
+			if (boardState[i] == 3) {king = true;}
+			else {king = false;}
+			var chk = new Checker(point, size, color, 1, king, false);
 			squares[i].checker = chk;
 		}
 		else {

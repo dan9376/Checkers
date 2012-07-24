@@ -15,82 +15,15 @@ var chkMoving = null;
 var time = 0;
 var activePlayer = 1;
 var turnState = "start";
+var boardState = [1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2];
+var moveLast = null;
+var moveCurrent = null;
 
-Object.prototype.clone = function() {
-  var newObj = (this instanceof Array) ? [] : {};
-  for (i in this) {
-    if (i == 'clone') continue;
-    if (this[i] && typeof this[i] == "object") {
-      newObj[i] = this[i].clone();
-    } else newObj[i] = this[i]
-  } return newObj;
-};
-/*
-Array.prototype.clone = function(doDeepCopy) {
-    if(doDeepCopy) {
-        var encountered = [{
-            a : this,
-            b : []
-        }];
-
-        var item,
-            levels = [{a:this, b:encountered[0].b, i:0}],
-            level = 0,
-            i = 0,
-            len = this.length;
-
-        while(i < len) {
-            item = levels[level].a[i];
-            if(Object.prototype.toString.call(item) === "[object Array]") {
-                for(var j = encountered.length - 1; j >= 0; j--) {
-                    if(encountered[j].a === item) {
-                        levels[level].b.push(encountered[j].b);
-                        break;
-                    }
-                }
-                if(j < 0) {
-                    encountered.push(j = {
-                        a : item,
-                        b : []
-                    });
-                    levels[level].b.push(j.b);
-                    levels[level].i = i + 1;
-                    levels[++level] = {a:item, b:j.b, i:0};
-                    i = -1;
-                    len = item.length;
-                }
-            }
-            else {
-                levels[level].b.push(item);
-            }
-
-            if(++i == len && level > 0) {
-                levels.pop();
-                i = levels[--level].i;
-                len = levels[level].a.length;
-            }
-        }
-
-        return encountered[0].b;
-    }
-    else {
-        return this.slice(0);
-    }
-};
-*/
 initializeBoard();
 initializeCheckers(canG.height/20);
-//console.log(squares[0]);
-render();
 saveGame();
-console.log("arrays are the same: " + (savedGame == squares));
-console.log("first squares are the same: " + (savedGame[0] == squares[0]));
-console.log("first checkers are the same: " + (savedGame[0].checker == squares[0].checker));
-//loadGame();
-//squares[0] = null;
-console.log(squares[0]);
-console.log(savedGame[0]);
-//console.log(savedGame[8].checker.point.x);
+loadGame();
+render();
 
 
 function clearHighlighting() {
@@ -112,56 +45,35 @@ function showButtons() {
 function turnDone() {
 	clearSideBoard();
 	saveGame();
-	//console.log(activePlayer);
 	if (activePlayer == 1) {activePlayer = 2;}
 	else {activePlayer = 1;}
-	//console.log(activePlayer);
 	turnState = "start";
+	moveCurrent = null;
 	render();
 };
 
 function turnUndo() {
-	//squares[13] = null;
-	//console.log(squares[13].checker.point.x);
-	//console.log(savedGame[13].checker.point.x);
-	//if (squares[0].checker == savedGame[0].checker) {console.log("first checker is the same")};
 	clearSideBoard();
 	loadGame();
-	//console.log(squares[13].checker.point.x);
-	//console.log(savedGame[13].checker.point.x);
 	turnState = "start";
+	moveCurrent = null;
 	render();
 };
 
-function copyData(obj) {
-	var out = $.extend(true, [], obj);
-	return out
-};
-function copyArray(arr) {
-	var copy = [];
-	var obj = {};
-	for (i = 0; i<arr.length; i++) {
-		obj = $.extend(true, {}, arr[i]);
-		copy.push(obj);
-	};
-	return copy;
-};
+function deepCopy(o) {return JSON.parse(JSON.stringify(o));}
 
 function saveGame() {
-	//savedGame = null;
-	//console.log(savedGame);
-	savedGame = squares.clone();
-	//savedGame = copyArray(squares);
-	//console.log(savedGame);
+	savedGame = deepCopy(squares);
+	var newState = recordBoardState(squares)
+	console.log(newState);
+	//convert array to string and strip out all commas
+	console.log(newState.join().replace(/,/g, ""));
 };
 
 function loadGame() {
-	//console.log(squares[13]);
-	//console.log(savedGame[13]);
-	//squares = null;
-	squares = savedGame.clone();
-	//squares = copyArray(savedGame);
+	squares = deepCopy(savedGame);
 };
+
 function validMoves(square,jumpOnly) {
 	// determines which squares are eligible moves for a given checker
 	// (checker is just an array property of a square)
@@ -231,7 +143,9 @@ function validMoves(square,jumpOnly) {
 	}
 	return count;
 };
+
 function validJump(start, target, middle) {
+	//console.log("middle checker = " + squares[middle].checker, "square = " + middle, "target checker = " + squares[target].checker, "square = " + target);
 	if (Math.abs(squares[middle].point.x - squares[start].point.x) == sqSize && Math.abs(squares[middle].point.y - squares[start].point.y) == sqSize) {	
 		if (squares[middle].checker != null && squares[target].checker == null) {
 			if (squares[middle].checker.color != squares[start].checker.color) {
@@ -243,3 +157,49 @@ function validJump(start, target, middle) {
 		}
 	}
 };
+
+function backRowEval(checker) {
+	var br = false;
+	if (checker.color == "red" && checker.point.y == sqSize/2 || checker.color == "black" && checker.point.y == canG.height - sqSize/2) {
+		br = true;
+	}
+	return br;
+};
+
+function kingEval(checker) {
+	var king = false;
+	if (backRowEval(checker) == true) {
+		if (checker.king == false) {
+			king = true;
+		}
+	}
+	return king;
+};
+
+function recordMove(existing, from, to, type) {
+	var currentMove;
+	// multi-jump
+	if (type == 'jump') {
+		if (existing != null) {currentMove = existing + "x" + to;}
+		//normal jump
+		else {currentMove = from + "x" + to;}
+	}
+	else { //not a jump
+		currentMove = from + "-" + to;
+	}
+	return currentMove;
+}
+
+function recordBoardState(arrSquares) {
+	var state;
+	var arrState = [];
+	for (i=0; i<arrSquares.length; i++) {
+		if (arrSquares[i].checker != null) {
+			if (arrSquares[i].checker.color == "red") {state = 1;}
+			else {state = 2;}
+		}
+		else {state = 0;}
+		arrState.push(state);
+	}
+	return arrState;
+}

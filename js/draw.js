@@ -1,17 +1,17 @@
 function render() {
-drawBoard(squares);
+drawBoard(squares, sqActive);
 }
-function drawBoard (sqArr){
+function drawBoard (arr, active){
 	clearBoard();
-	drawSquares(sqArr);
+	drawSquares(arr, active);
 	drawSideBoard();
 }
 function clearBoard (){
 	//ctxB.clearRect(0,0, canB.width, canB.length);
 	//ctxG.clearRect(0,0, canG.width, canG.length);
 	
-	//ctx.fillStyle = "rgb(200, 100, 100)";
-	//ctx.fillRect(0,0, can.width, can.length);
+	//ctxB.fillStyle = "rgb(200, 100, 100)";
+	//ctxB.fillRect(0,0, canB.width, canB.length);
 	canG.width = canG.width;
 }
 function clearSideBoard (){
@@ -29,24 +29,47 @@ function drawSquare(point,size,color,highlighted) {
 		ctxB.strokeRect(point.x+line,point.y+line,size-(line*2),size-(line*2));
 	}
 }
-function drawSquares(arr) {
+function drawSquares(arr, active) {
 	for (var i=0; i < arr.length; i++) {
 		drawSquare(arr[i].point, arr[i].size, arr[i].color, arr[i].highlighted);
-		//console.log(i,arr[i].point, arr.length);
+		//console.log(active, i);
 		if (arr[i].checker != null) {
 			if (arr[i].checker.point != null) {
-				drawChecker(
-				arr[i].checker.point, 
-				arr[i].checker.size, 
-				arr[i].checker.color, 
-				arr[i].checker.opacity, 
-				arr[i].checker.king, 
-				arr[i].checker.highlighted);
-			}
+				if  (active == null) {
+						drawChecker(
+						arr[i].checker.point, 
+						arr[i].checker.size, 
+						arr[i].checker.color, 
+						arr[i].checker.opacity, 
+						arr[i].checker.king, 
+						arr[i].checker.highlighted);
+				}
+				else  {
+					if (active != i) {
+						drawChecker(
+						arr[i].checker.point, 
+						arr[i].checker.size, 
+						arr[i].checker.color, 
+						arr[i].checker.opacity, 
+						arr[i].checker.king, 
+						arr[i].checker.highlighted);
+					}
+				}
+			}	
 		}
 	}
-	
+	// draws the active checker last, so it always appears to jump over other checkers, rather than sliding behind
+	if (active != null) {
+		drawChecker(
+		arr[active].checker.point, 
+		arr[active].checker.size, 
+		arr[active].checker.color, 
+		arr[active].checker.opacity, 
+		arr[active].checker.king, 
+		arr[active].checker.highlighted);
+	}
 }
+
 function drawChecker(point,size,color,opacity,king,highlighted) {
 	//console.log(point);
 	ctxG.beginPath();
